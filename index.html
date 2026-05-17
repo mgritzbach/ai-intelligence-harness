@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI News & Intelligence Harness</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #08111f;
+    --accent: #2563eb;
+    --a2:     #3b82f6;
+    --gold:   #c9a84c;
+    --gold2:  #e8c97a;
+    --white:  #ffffff;
+    --muted:  #64748b;
+    --green:  #10b981;
+    --red:    #ef4444;
+    --amber:  #f59e0b;
+    --purple: #8b5cf6;
+    --teal:   #06b6d4;
+    --soft:   rgba(255,255,255,0.055);
+    --bdr:    rgba(255,255,255,0.09);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #060e1a;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+
+  .slide {
+    position: absolute; inset: 0;
+    opacity: 0; pointer-events: none;
+    transform: translateX(48px);
+    transition: opacity .42s cubic-bezier(.4,0,.2,1), transform .42s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .slide.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+  .slide.prev   { opacity: 0; transform: translateX(-48px); pointer-events: none; }
+
+  .topbar { height: 3px; flex-shrink: 0; background: linear-gradient(90deg, var(--gold) 0%, var(--gold2) 35%, var(--a2) 100%); }
+
+  .slide-hd {
+    flex-shrink: 0; height: 44px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 56px;
+  }
+  .eyebrow {
+    font-size: 10px; font-weight: 800; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--gold);
+    display: flex; align-items: center; gap: 9px;
+  }
+  .eyebrow::before { content: ''; display: block; width: 18px; height: 2px; background: var(--gold); }
+  .slide-num { font-size: 10px; color: rgba(255,255,255,0.2); font-weight: 600; letter-spacing: 1px; }
+
+  .slide-ft {
+    flex-shrink: 0; height: 36px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 56px; border-top: 1px solid var(--bdr);
+  }
+  .ft-brand { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.16); }
+  .ft-date  { font-size: 10px; color: rgba(255,255,255,0.16); }
+
+  .body {
+    flex: 1; min-height: 0; overflow: hidden;
+    padding: 0 56px 14px;
+    display: flex; flex-direction: column;
+  }
+
+  /* NAV */
+  .nav {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px; z-index: 100;
+    background: rgba(255,255,255,0.07); backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 50px;
+    padding: 6px 16px;
+  }
+  .nb {
+    width: 28px; height: 28px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+    transition: background .18s; line-height: 1;
+  }
+  .nb:hover { background: rgba(255,255,255,0.24); }
+  .nb:disabled { opacity: .25; cursor: default; }
+  .dots { display: flex; gap: 6px; align-items: center; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.22); cursor: pointer; transition: all .2s; }
+  .dot.on { background: var(--gold2); width: 20px; border-radius: 3px; }
+  .nc { font-size: 10px; color: rgba(255,255,255,0.3); min-width: 30px; text-align: center; }
+
+  .tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; padding: 5px 14px; border-radius: 20px; border: 1px solid;
+  }
+  .tb { color: var(--a2);    border-color: rgba(59,130,246,.4);  background: rgba(59,130,246,.1); }
+  .tg { color: var(--gold2); border-color: rgba(201,168,76,.4);  background: rgba(201,168,76,.1); }
+  .tn { color: var(--green); border-color: rgba(16,185,129,.4);  background: rgba(16,185,129,.1); }
+
+
+  /* ══════════════════════════════════════
+     SLIDE 1 — TITLE + FLOW DIAGRAM
+  ══════════════════════════════════════ */
+  #s1 {
+    background:
+      radial-gradient(ellipse at 65% 25%, rgba(37,99,235,.2) 0%, transparent 58%),
+      radial-gradient(ellipse at 15% 85%, rgba(201,168,76,.1) 0%, transparent 50%),
+      var(--navy);
+  }
+  #s1 .body { gap: 16px; padding-top: 8px; }
+
+  /* TOP ROW: title left, KPIs right */
+  .s1-top { display: flex; align-items: center; gap: 48px; flex-shrink: 0; }
+  .s1-left { flex: 1; min-width: 0; }
+  #s1 h1 {
+    font-size: 46px; font-weight: 900; line-height: 1.04;
+    color: #fff; letter-spacing: -2px; margin: 10px 0 14px;
+  }
+  #s1 h1 em { font-style: normal; color: var(--gold2); }
+  #s1 .sub { font-size: 14px; color: rgba(255,255,255,.48); font-weight: 400; line-height: 1.6; max-width: 520px; }
+  #s1 .tags { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+  .s1-kpis { display: flex; flex-direction: column; gap: 10px; width: 230px; flex-shrink: 0; }
+  .kpi {
+    background: var(--soft); border: 1px solid var(--bdr);
+    border-radius: 11px; padding: 14px 18px;
+  }
+  .kpi-n { font-size: 34px; font-weight: 900; letter-spacing: -1.5px; color: #fff; line-height: 1; }
+  .kpi-n sub { font-size: 14px; font-weight: 500; color: var(--gold2); vertical-align: baseline; margin-left: 2px; }
+  .kpi-l { font-size: 10px; text-transform: uppercase; letter-spacing: .8px; font-weight: 600; color: rgba(255,255,255,.3); margin-top: 4px; }
+
+  /* FLOW DIAGRAM — bottom of slide 1 */
+  .flow-strip {
+    flex: 1; min-height: 0; overflow: hidden;
+    display: flex; align-items: stretch; gap: 0;
+    background: rgba(255,255,255,.025);
+    border: 1px solid var(--bdr);
+    border-radius: 14px;
+    padding: 16px 20px;
+  }
+  .fs-box {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 6px;
+    border-radius: 10px; padding: 14px 10px;
+    border: 1px solid; text-align: center; min-width: 0; overflow: hidden;
+  }
+  .fs-box.setup   { background: rgba(37,99,235,.1);   border-color: rgba(37,99,235,.3); }
+  .fs-box.data    { background: rgba(245,158,11,.1);  border-color: rgba(245,158,11,.3); }
+  .fs-box.agents  { background: rgba(16,185,129,.09); border-color: rgba(16,185,129,.28); flex: 2; }
+  .fs-box.verify  { background: rgba(239,68,68,.09);  border-color: rgba(239,68,68,.28); }
+  .fs-box.publish { background: rgba(139,92,246,.1);  border-color: rgba(139,92,246,.3); }
+
+  .fs-icon  { font-size: 24px; line-height: 1; flex-shrink: 0; }
+  .fs-title { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.3; }
+  .fs-sub   { font-size: 10px; color: rgba(255,255,255,.38); line-height: 1.3; }
+
+  .fs-badge {
+    font-size: 9px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 10px;
+  }
+  .fs-box.setup   .fs-badge { background: rgba(37,99,235,.3);   color: #93c5fd; }
+  .fs-box.data    .fs-badge { background: rgba(245,158,11,.3);  color: #fcd34d; }
+  .fs-box.agents  .fs-badge { background: rgba(16,185,129,.25); color: #6ee7b7; }
+  .fs-box.verify  .fs-badge { background: rgba(239,68,68,.25);  color: #fca5a5; }
+  .fs-box.publish .fs-badge { background: rgba(139,92,246,.25); color: #c4b5fd; }
+
+  .fs-arr {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; flex-shrink: 0;
+    font-size: 18px; color: rgba(255,255,255,.18);
+  }
+
+  /* mini agent dots inside agents box */
+  .fs-agents-row {
+    display: flex; gap: 3px; flex-wrap: wrap;
+    justify-content: center; max-width: 200px;
+  }
+  .fs-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(16,185,129,.5); border: 1px solid rgba(16,185,129,.3);
+  }
+
+
+  /* ══════════════════════════════════════
+     SLIDE 2 — THE PROBLEM
+  ══════════════════════════════════════ */
+  #s2 { background: var(--navy); }
+  #s2 .body { gap: 18px; padding-top: 12px; }
+  #s2 h2 { font-size: 34px; font-weight: 900; color: #fff; letter-spacing: -1px; line-height: 1.15; flex-shrink: 0; }
+  #s2 h2 em { font-style: normal; color: var(--gold2); }
+
+  .pgrid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; flex: 1; min-height: 0; }
+  .pc {
+    background: rgba(239,68,68,.05); border: 1px solid rgba(239,68,68,.2);
+    border-radius: 14px; padding: 22px 20px;
+    display: flex; flex-direction: column; gap: 11px;
+    position: relative; overflow: hidden; min-height: 0;
+  }
+  .pc::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--red); }
+  .pc-ico   { font-size: 26px; }
+  .pc-title { font-size: 18px; font-weight: 800; color: #fca5a5; line-height: 1.2; }
+  .pc-desc  { font-size: 13px; color: rgba(255,255,255,.42); line-height: 1.55; flex: 1; }
+  .pc-eg {
+    background: rgba(239,68,68,.1); border-left: 2px solid var(--red);
+    border-radius: 5px; padding: 8px 12px;
+    font-size: 12px; color: #fca5a5; font-style: italic; line-height: 1.5;
+  }
+
+  .sol {
+    background: linear-gradient(135deg, rgba(37,99,235,.14), rgba(16,185,129,.09));
+    border: 1px solid rgba(37,99,235,.28); border-radius: 12px;
+    padding: 16px 22px; display: flex; align-items: center; gap: 16px; flex-shrink: 0;
+  }
+  .sol-ico  { font-size: 24px; flex-shrink: 0; }
+  .sol-lbl  { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--a2); margin-bottom: 3px; }
+  .sol-text { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.4; }
+
+
+  /* ══════════════════════════════════════
+     SLIDE 3 — PIPELINE
+  ══════════════════════════════════════ */
+  #s3 { background: var(--navy); }
+  #s3 .body { gap: 14px; padding-top: 10px; }
+  #s3 h2 { font-size: 30px; font-weight: 900; color: #fff; letter-spacing: -.8px; line-height: 1.2; flex-shrink: 0; }
+  #s3 h2 em { font-style: normal; color: var(--gold2); }
+
+  .phases { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: 0; overflow: hidden; }
+
+  .ph {
+    border-radius: 14px; padding: 18px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+    border: 1px solid; overflow: hidden; min-height: 0;
+  }
+  .ph-setup  { background: rgba(37,99,235,.08);  border-color: rgba(37,99,235,.2); }
+  .ph-core   { background: rgba(16,185,129,.07); border-color: rgba(16,185,129,.22); border-radius: 14px; }
+  .ph-verify { background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.22); }
+
+  .ph-lbl { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.3px; flex-shrink: 0; }
+  .ph-setup  .ph-lbl { color: var(--a2); }
+  .ph-core   .ph-lbl { color: var(--green); }
+  .ph-verify .ph-lbl { color: #c4b5fd; }
+
+  .ph-title { font-size: 16px; font-weight: 800; color: #fff; line-height: 1.2; flex-shrink: 0; }
+  .ph-desc  { font-size: 11px; color: rgba(255,255,255,.35); line-height: 1.5; flex-shrink: 0; }
+
+  .ph-steps { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0; overflow: hidden; }
+  .ps {
+    display: flex; align-items: flex-start; gap: 9px;
+    background: rgba(255,255,255,.04); border-radius: 7px; padding: 8px 10px; flex-shrink: 0;
+  }
+  .psn {
+    font-size: 9px; font-weight: 800; min-width: 18px;
+    border-radius: 3px; padding: 2px 4px; text-align: center; line-height: 1.4; flex-shrink: 0;
+  }
+  .ph-setup  .psn { background: rgba(37,99,235,.25);  color: var(--a2); }
+  .ph-verify .psn { background: rgba(139,92,246,.25); color: #c4b5fd; }
+  .pst { font-size: 11px; color: rgba(255,255,255,.6); line-height: 1.4; font-weight: 500; }
+  .pst strong { color: rgba(255,255,255,.9); font-weight: 700; }
+
+  .ph-arrow {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; flex-shrink: 0; font-size: 22px; color: rgba(255,255,255,.14);
+  }
+
+  .ag-section { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+  .ag-grid {
+    display: grid; grid-template-columns: repeat(7,1fr); gap: 6px;
+    flex: 1; min-height: 0;
+  }
+  .ab {
+    background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.22);
+    border-radius: 9px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px; padding: 8px 4px;
+    min-height: 0; overflow: hidden;
+  }
+  .ab .e { font-size: 18px; line-height: 1; }
+  .ab .n { font-size: 10px; font-weight: 700; color: #6ee7b7; text-align: center; line-height: 1.1; }
+  .ab .m { font-size: 8px; color: rgba(110,231,183,.4); }
+
+  .ag-ft {
+    background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.15);
+    border-radius: 9px; padding: 9px 14px; text-align: center; flex-shrink: 0;
+  }
+  .ag-ft-t { font-size: 11px; color: rgba(255,255,255,.4); line-height: 1.4; }
+  .ag-ft-t strong { color: #6ee7b7; }
+
+
+  /* ══════════════════════════════════════
+     SLIDE 4 — VERIFICATION
+  ══════════════════════════════════════ */
+  #s4 { background: var(--navy); }
+  #s4 .body { flex-direction: row; gap: 26px; padding-top: 10px; }
+  #s4 h2 { font-size: 30px; font-weight: 900; color: #fff; letter-spacing: -.8px; line-height: 1.2; flex-shrink: 0; }
+  #s4 h2 em { font-style: normal; color: var(--gold2); }
+
+  .v-left  { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+  .v-right { width: 290px; flex-shrink: 0; display: flex; flex-direction: column; gap: 9px; overflow: hidden; min-height: 0; }
+
+  .v-lbl { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,.28); flex-shrink: 0; }
+
+  .rules { display: flex; flex-direction: column; gap: 7px; flex: 1; min-height: 0; overflow: hidden; }
+  .rc {
+    background: var(--soft); border: 1px solid var(--bdr);
+    border-radius: 10px; padding: 10px 14px;
+    display: flex; align-items: flex-start; gap: 12px; flex-shrink: 0;
+  }
+  .rc-n     { font-size: 17px; font-weight: 900; color: var(--gold2); min-width: 24px; line-height: 1; padding-top: 1px; }
+  .rc-title { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.3; }
+  .rc-body  { font-size: 11px; color: rgba(255,255,255,.38); line-height: 1.4; margin-top: 2px; }
+
+  .sv-hero {
+    background: linear-gradient(135deg, rgba(239,68,68,.12), rgba(139,92,246,.14));
+    border: 1px solid rgba(239,68,68,.25); border-radius: 12px;
+    padding: 14px 16px; text-align: center; flex-shrink: 0;
+  }
+  .sv-tag  { font-size: 9px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: #fca5a5; margin-bottom: 5px; }
+  .sv-name { font-size: 17px; font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 4px; }
+  .sv-desc { font-size: 11px; color: rgba(255,255,255,.38); line-height: 1.45; }
+
+  .cc {
+    background: rgba(239,68,68,.07); border: 1px solid rgba(239,68,68,.2);
+    border-radius: 9px; padding: 9px 13px;
+    display: flex; align-items: center; gap: 11px; flex-shrink: 0;
+  }
+  .cc-l { font-size: 15px; font-weight: 900; color: #fca5a5; min-width: 18px; }
+  .cc-t { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.2; }
+  .cc-s { font-size: 10px; color: rgba(255,255,255,.32); }
+
+  .vr {
+    border-radius: 9px; padding: 8px 13px; border: 1px solid;
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .vr.pass { background: rgba(16,185,129,.1);  border-color: rgba(16,185,129,.25); }
+  .vr.down { background: rgba(245,158,11,.1);  border-color: rgba(245,158,11,.25); }
+  .vr.rej  { background: rgba(239,68,68,.1);   border-color: rgba(239,68,68,.25); }
+  .vr.warn { background: rgba(6,182,212,.08);  border-color: rgba(6,182,212,.2); }
+  .vr-ico  { font-size: 14px; }
+  .vr-t    { font-size: 12px; font-weight: 800; color: #fff; }
+  .vr-s    { font-size: 10px; color: rgba(255,255,255,.32); }
+
+
+  /* ══════════════════════════════════════
+     SLIDE 5 — IMPACT
+  ══════════════════════════════════════ */
+  #s5 {
+    background:
+      radial-gradient(ellipse at 25% 20%, rgba(201,168,76,.12), transparent 52%),
+      radial-gradient(ellipse at 80% 80%, rgba(37,99,235,.12), transparent 52%),
+      var(--navy);
+  }
+  #s5 .body { gap: 16px; padding-top: 10px; }
+  #s5 h2 { font-size: 30px; font-weight: 900; color: #fff; letter-spacing: -.8px; line-height: 1.2; flex-shrink: 0; }
+  #s5 h2 em { font-style: normal; color: var(--gold2); }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; flex-shrink: 0; }
+  .kb {
+    background: var(--soft); border: 1px solid var(--bdr);
+    border-radius: 14px; padding: 18px 16px; position: relative; overflow: hidden;
+  }
+  .kb::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 14px 14px 0 0; }
+  .kb.c1::after { background: var(--gold); }
+  .kb.c2::after { background: var(--green); }
+  .kb.c3::after { background: var(--a2); }
+  .kb.c4::after { background: var(--purple); }
+  .kb-n   { font-size: 38px; font-weight: 900; letter-spacing: -1.5px; color: #fff; line-height: 1; margin-bottom: 5px; }
+  .kb-n sup { font-size: 17px; font-weight: 600; color: var(--gold2); }
+  .kb-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .8px; font-weight: 700; color: rgba(255,255,255,.28); margin-bottom: 8px; }
+  .kb-det { font-size: 12px; color: rgba(255,255,255,.4); line-height: 1.45; }
+
+  .bg { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; min-height: 0; overflow: hidden; }
+
+  .sc {
+    background: var(--soft); border: 1px solid var(--bdr);
+    border-radius: 14px; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 11px; overflow: hidden; min-height: 0;
+  }
+  .sc-lbl { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold); flex-shrink: 0; }
+  .si {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px; border-radius: 10px; border: 1px solid; flex-shrink: 0;
+  }
+  .si.wed { background: rgba(37,99,235,.1);  border-color: rgba(37,99,235,.25); }
+  .si.sun { background: rgba(139,92,246,.1); border-color: rgba(139,92,246,.25); }
+  .si-day { font-size: 20px; font-weight: 900; color: #fff; min-width: 46px; }
+  .si-t   { font-size: 13px; font-weight: 700; color: #fff; }
+  .si-s   { font-size: 11px; color: rgba(255,255,255,.35); }
+  .si-c   { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.28); text-align: right; }
+  .sc-note { font-size: 11px; color: rgba(255,255,255,.28); line-height: 1.6; padding-top: 10px; border-top: 1px solid var(--bdr); flex-shrink: 0; }
+
+  .cc2 {
+    background: var(--soft); border: 1px solid var(--bdr);
+    border-radius: 14px; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 11px; overflow: hidden; min-height: 0;
+  }
+  .cc2-lbl  { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold); flex-shrink: 0; }
+  .ci       { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .ci-n     { font-size: 12px; color: rgba(255,255,255,.38); width: 165px; flex-shrink: 0; }
+  .ci-n.sel { color: rgba(255,255,255,.82); font-weight: 700; }
+  .ci-bw    { flex: 1; height: 7px; background: rgba(255,255,255,.07); border-radius: 4px; overflow: hidden; }
+  .ci-b     { height: 100%; border-radius: 4px; }
+  .ci-v     { font-size: 13px; font-weight: 700; color: #fff; min-width: 46px; text-align: right; }
+  .cc2-note { font-size: 11px; color: rgba(255,255,255,.28); line-height: 1.55; padding-top: 10px; border-top: 1px solid var(--bdr); flex-shrink: 0; }
+
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+<!-- ═══════════════════════════════
+     SLIDE 1 · TITLE + FLOW
+═══════════════════════════════ -->
+<div class="slide active" id="s1">
+  <div class="topbar"></div>
+  <div class="slide-hd">
+    <div class="eyebrow">AI Harness · News &amp; Intelligence</div>
+    <span class="slide-num">01 / 05</span>
+  </div>
+  <div class="body">
+
+    <!-- TOP ROW -->
+    <div class="s1-top">
+      <div class="s1-left">
+        <div class="eyebrow" style="margin-bottom:10px">Architecture Overview</div>
+        <h1>Automated<br><em>Global Intelligence</em><br>at Your Fingertips</h1>
+        <p class="sub">An AI-powered news harness that gathers, verifies, and summarises world events twice weekly — with zero tolerance for hallucinated facts.</p>
+        <div class="tags">
+          <span class="tag tb">15 Parallel Agents</span>
+          <span class="tag tg">Live Market Data</span>
+          <span class="tag tn">Multi-Layer Verification</span>
+        </div>
+      </div>
+      <div class="s1-kpis">
+        <div class="kpi">
+          <div class="kpi-n">15<sub>agents</sub></div>
+          <div class="kpi-l">Running in parallel per briefing</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-n">10<sub>steps</sub></div>
+          <div class="kpi-l">From trigger to PDF — automated</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-n">0<sub>%</sub></div>
+          <div class="kpi-l">Model memory used for any fact</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOW DIAGRAM -->
+    <div class="flow-strip">
+
+      <div class="fs-box setup">
+        <div class="fs-icon">⏰</div>
+        <div class="fs-title">Setup &amp;<br>Schedule</div>
+        <div class="fs-badge">Steps 1–3</div>
+        <div class="fs-sub">Cron trigger · coverage<br>window · prev briefing</div>
+      </div>
+
+      <div class="fs-arr">→</div>
+
+      <div class="fs-box data">
+        <div class="fs-icon">📊</div>
+        <div class="fs-title">Live Market<br>Data</div>
+        <div class="fs-badge">Step 2</div>
+        <div class="fs-sub">Python yfinance<br>Yahoo Finance API<br>Zero model memory</div>
+      </div>
+
+      <div class="fs-arr">→</div>
+
+      <div class="fs-box agents">
+        <div class="fs-icon">🔬</div>
+        <div class="fs-title">14 × Low-token Research Agents</div>
+        <div class="fs-badge">Step 4 · All in parallel</div>
+        <div class="fs-agents-row">
+          <div class="fs-dot"></div><div class="fs-dot"></div><div class="fs-dot"></div><div class="fs-dot"></div>
+          <div class="fs-dot"></div><div class="fs-dot"></div><div class="fs-dot"></div><div class="fs-dot"></div>
+          <div class="fs-dot"></div><div class="fs-dot"></div><div class="fs-dot"></div><div class="fs-dot"></div>
+          <div class="fs-dot"></div><div class="fs-dot"></div>
+        </div>
+        <div class="fs-sub">Europe · USA · Russia · China · Asia<br>M.East · Africa · LatAm · Ukraine · UN<br>Tech · Defense · Economy · Climate</div>
+      </div>
+
+      <div class="fs-arr">→</div>
+
+      <div class="fs-box verify">
+        <div class="fs-icon">✓</div>
+        <div class="fs-title">Higher-token<br>Verifier</div>
+        <div class="fs-badge">Step 6</div>
+        <div class="fs-sub">4 binary checks<br>URL · Date · Quote<br>2nd source</div>
+      </div>
+
+      <div class="fs-arr">→</div>
+
+      <div class="fs-box publish">
+        <div class="fs-icon">📄</div>
+        <div class="fs-title">Publish &amp;<br>Deliver</div>
+        <div class="fs-badge">Steps 8–10</div>
+        <div class="fs-sub">Dedup · Write<br>MD + PDF<br>Calendar event</div>
+      </div>
+
+    </div>
+  </div>
+  <div class="slide-ft">
+    <span class="ft-brand">AI News &amp; Intelligence Harness</span>
+    <span class="ft-date">May 2026 · Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════
+     SLIDE 2 · THE PROBLEM
+═══════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="topbar"></div>
+  <div class="slide-hd">
+    <div class="eyebrow">The Problem</div>
+    <span class="slide-num">02 / 05</span>
+  </div>
+  <div class="body">
+    <h2>AI models <em>fabricate facts.</em><br>We built a system that makes it impossible.</h2>
+    <div class="pgrid">
+      <div class="pc">
+        <div class="pc-ico">📉</div>
+        <div class="pc-title">Hallucinated Market Data</div>
+        <div class="pc-desc">Models confidently recall prices from training — often months or years stale — presenting them alongside live news as if current.</div>
+        <div class="pc-eg">"EUR/USD = 1.09" reported with full confidence. The real rate was 1.16 — a 6.4% error on a critical metric.</div>
+      </div>
+      <div class="pc">
+        <div class="pc-ico">📰</div>
+        <div class="pc-title">Stale or Invented Stories</div>
+        <div class="pc-desc">Without date verification, agents cite events from their training window and present them as current news — indistinguishable from live reporting.</div>
+        <div class="pc-eg">A story from 18 months ago in a "this week" briefing — no date, no flag, no warning to the reader.</div>
+      </div>
+      <div class="pc">
+        <div class="pc-ico">🔗</div>
+        <div class="pc-title">Fabricated Source URLs</div>
+        <div class="pc-desc">Models generate plausible-looking URLs that are dead links, paywalled pages with no article body, or entirely invented domains.</div>
+        <div class="pc-eg">Source: reuters.com/article/xyz — returns 404. The story was never verified as real.</div>
+      </div>
+    </div>
+    <div class="sol">
+      <div class="sol-ico">🛡️</div>
+      <div>
+        <div class="sol-lbl">Our Response</div>
+        <div class="sol-text">15-agent parallel architecture · Mandatory URL fetching · Article date extraction · Verbatim proof-of-reading · Dual sourcing · Independent higher-token verification agent</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-ft">
+    <span class="ft-brand">AI News &amp; Intelligence Harness</span>
+    <span class="ft-date">May 2026 · Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════
+     SLIDE 3 · PIPELINE
+═══════════════════════════════ -->
+<div class="slide" id="s3">
+  <div class="topbar"></div>
+  <div class="slide-hd">
+    <div class="eyebrow">Architecture</div>
+    <span class="slide-num">03 / 05</span>
+  </div>
+  <div class="body">
+    <h2>Three-phase pipeline — <em>setup · research · verify &amp; publish</em></h2>
+    <div class="phases">
+
+      <div class="ph ph-setup" style="width:200px;flex-shrink:0">
+        <div class="ph-lbl">Phase 1 · Orchestrator</div>
+        <div class="ph-title">Setup &amp;<br>Context</div>
+        <div class="ph-desc">Everything agents need before launch.</div>
+        <div class="ph-steps">
+          <div class="ps">
+            <span class="psn">S1</span>
+            <div class="pst"><strong>Scheduler fires</strong><br>Cron 30 7 * * 0,3 · Sets coverage window</div>
+          </div>
+          <div class="ps">
+            <span class="psn">S2</span>
+            <div class="pst"><strong>Live market data</strong><br>Python yfinance · Yahoo Finance API</div>
+          </div>
+          <div class="ps">
+            <span class="psn">S3</span>
+            <div class="pst"><strong>Load previous briefing</strong><br>Enables NEW / Developing / STALE tagging</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ph-arrow">→</div>
+
+      <div class="ph ph-core" style="flex:1;min-width:0">
+        <div class="ph-lbl">Phase 2 · All 14 launched simultaneously</div>
+        <div class="ph-title">14 × Low-token Research Agents — parallel</div>
+        <div class="ph-desc">Each agent: WebSearch → WebFetch → Structured JSON with date, verbatim quote, and source URLs</div>
+        <div class="ag-section">
+          <div class="ag-grid">
+            <div class="ab"><div class="e">🌍</div><div class="n">Europe</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">🇺🇸</div><div class="n">USA</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">🇷🇺</div><div class="n">Russia</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">🇨🇳</div><div class="n">China</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">🌏</div><div class="n">Asia</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">🕌</div><div class="n">M. East</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">🌍</div><div class="n">Africa</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">🌎</div><div class="n">Lat Am</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">🇺🇦</div><div class="n">Ukraine</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">🌐</div><div class="n">UN/Intl</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">💻</div><div class="n">Tech</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">⚔️</div><div class="n">Defense</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">💰</div><div class="n">Economy</div><div class="m">Low-token</div></div>
+            <div class="ab"><div class="e">🌱</div><div class="n">Climate</div><div class="m">Low-token</div></div>
+          </div>
+          <div class="ag-ft">
+            <div class="ag-ft-t">Every story carries: <strong>article_date · verbatim_quote · source_url · second_source_url · tier</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ph-arrow">→</div>
+
+      <div class="ph ph-verify" style="width:200px;flex-shrink:0">
+        <div class="ph-lbl">Phase 3 · Higher-token + Orchestrator</div>
+        <div class="ph-title">Verify &amp;<br>Publish</div>
+        <div class="ph-desc">Independent audit, dedup, write, deliver.</div>
+        <div class="ph-steps">
+          <div class="ps">
+            <span class="psn">S6</span>
+            <div class="pst"><strong>Higher-token verifier</strong><br>Re-fetches all tier1 · 4 binary checks</div>
+          </div>
+          <div class="ps">
+            <span class="psn">S7</span>
+            <div class="pst"><strong>Deduplication</strong><br>Compare to prev briefing · tag or drop</div>
+          </div>
+          <div class="ps">
+            <span class="psn">S8</span>
+            <div class="pst"><strong>Write briefing</strong><br>All regions · markets · verification log</div>
+          </div>
+          <div class="ps">
+            <span class="psn">S9</span>
+            <div class="pst"><strong>Save MD + PDF</strong><br>OneDrive · Daily Briefing folder</div>
+          </div>
+          <div class="ps">
+            <span class="psn">S10</span>
+            <div class="pst"><strong>Calendar event</strong><br>Google Calendar · summary + links</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="slide-ft">
+    <span class="ft-brand">AI News &amp; Intelligence Harness</span>
+    <span class="ft-date">May 2026 · Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════
+     SLIDE 4 · VERIFICATION ENGINE
+═══════════════════════════════ -->
+<div class="slide" id="s4">
+  <div class="topbar"></div>
+  <div class="slide-hd">
+    <div class="eyebrow">Verification Engine</div>
+    <span class="slide-num">04 / 05</span>
+  </div>
+  <div class="body">
+    <div class="v-left">
+      <h2>Six hard rules.<br><em>Zero tolerance for fabrication.</em></h2>
+      <div class="v-lbl">Applied by every low-token agent — no exceptions</div>
+      <div class="rules">
+        <div class="rc">
+          <div class="rc-n">R1</div>
+          <div><div class="rc-title">No Numbers from Memory</div><div class="rc-body">Every figure must come from a fetched URL. Model recall is banned.</div></div>
+        </div>
+        <div class="rc">
+          <div class="rc-n">R2</div>
+          <div><div class="rc-title">Verify Every URL by Fetching</div><div class="rc-body">All source URLs fetched and confirmed live. Dead links = story rejected.</div></div>
+        </div>
+        <div class="rc">
+          <div class="rc-n">R3</div>
+          <div><div class="rc-title">No Stories from Training Data</div><div class="rc-body">All stories must originate from a live web search result.</div></div>
+        </div>
+        <div class="rc">
+          <div class="rc-n">R4</div>
+          <div><div class="rc-title">Extract Article Date from the Page</div><div class="rc-body">Publication date found in HTML. Stories outside window = rejected.</div></div>
+        </div>
+        <div class="rc">
+          <div class="rc-n">R5</div>
+          <div><div class="rc-title">Include One Verbatim Quote</div><div class="rc-body">One exact sentence copied word-for-word. Proves the agent read the source.</div></div>
+        </div>
+        <div class="rc">
+          <div class="rc-n">R6</div>
+          <div><div class="rc-title">Two Sources for Tier 1 Stories</div><div class="rc-body">Top stories need a second independently-fetched URL. Else auto-downgraded.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="v-right">
+      <div class="sv-hero">
+        <div class="sv-tag">Step 6 · Independent Audit</div>
+        <div class="sv-name">Higher-token<br>Verification Agent</div>
+        <div class="sv-desc">Re-fetches all tier1 stories with no context from low-token agents. Four binary checks. Structured verdicts.</div>
+      </div>
+      <div class="v-lbl">4 Checks · Tier 1 only</div>
+      <div class="cc">
+        <div class="cc-l">A</div>
+        <div><div class="cc-t">URL Live &amp; Relevant</div><div class="cc-s">Fetch source_url · confirm page loads</div></div>
+      </div>
+      <div class="cc">
+        <div class="cc-l">B</div>
+        <div><div class="cc-t">Date Within Window</div><div class="cc-s">Locate date on page · reject if outside</div></div>
+      </div>
+      <div class="cc">
+        <div class="cc-l">C</div>
+        <div><div class="cc-t">Verbatim Quote Found</div><div class="cc-s">Exact sentence on page · reject if missing</div></div>
+      </div>
+      <div class="cc">
+        <div class="cc-l">D</div>
+        <div><div class="cc-t">Second Source Confirmed</div><div class="cc-s">Fetch second_source_url · downgrade if none</div></div>
+      </div>
+      <div class="v-lbl">Verdicts</div>
+      <div class="vr pass"><div class="vr-ico">✓</div><div><div class="vr-t">VERIFIED</div><div class="vr-s">All four checks pass</div></div></div>
+      <div class="vr down"><div class="vr-ico">⬇</div><div><div class="vr-t">DOWNGRADE</div><div class="vr-s">tier1→tier2 · missing 2nd source</div></div></div>
+      <div class="vr rej"><div class="vr-ico">✕</div><div><div class="vr-t">REJECT</div><div class="vr-s">Dead URL · stale date · quote missing</div></div></div>
+      <div class="vr warn"><div class="vr-ico">⚠</div><div><div class="vr-t">VERIFIED-WARN</div><div class="vr-s">Passes all · date not found on page</div></div></div>
+    </div>
+  </div>
+  <div class="slide-ft">
+    <span class="ft-brand">AI News &amp; Intelligence Harness</span>
+    <span class="ft-date">May 2026 · Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════
+     SLIDE 5 · IMPACT & SCHEDULE
+═══════════════════════════════ -->
+<div class="slide" id="s5">
+  <div class="topbar"></div>
+  <div class="slide-hd">
+    <div class="eyebrow">Impact &amp; Operations</div>
+    <span class="slide-num">05 / 05</span>
+  </div>
+  <div class="body">
+    <h2>Built for speed, reliability, and<br><em>zero compromise on accuracy</em></h2>
+
+    <div class="kpi-row">
+      <div class="kb c1">
+        <div class="kb-n">15<sup>×</sup></div>
+        <div class="kb-lbl">Parallel agents</div>
+        <div class="kb-det">14 low-token researchers + 1 higher-token verifier — all research runs simultaneously</div>
+      </div>
+      <div class="kb c2">
+        <div class="kb-n">6<sup>+4</sup></div>
+        <div class="kb-lbl">Verification checks</div>
+        <div class="kb-det">6 hard agent rules + 4 independent higher-token checks — layered defence against fabrication</div>
+      </div>
+      <div class="kb c3">
+        <div class="kb-n">~$6</div>
+        <div class="kb-lbl">Cost per briefing</div>
+        <div class="kb-det">~$48/month twice-weekly — 65% cheaper than running all higher-token agents</div>
+      </div>
+      <div class="kb c4">
+        <div class="kb-n">100<sup>%</sup></div>
+        <div class="kb-lbl">Live-sourced data</div>
+        <div class="kb-det">All prices via Python yfinance · Yahoo Finance API · model memory impossible</div>
+      </div>
+    </div>
+
+    <div class="bg">
+      <div class="sc">
+        <div class="sc-lbl">Delivery Schedule</div>
+        <div class="si wed">
+          <div class="si-day">WED</div>
+          <div><div class="si-t">07:30 AM</div><div class="si-s">cron 30 7 * * 3</div></div>
+          <div class="si-c">Covers<br>Mon→Wed</div>
+        </div>
+        <div class="si sun">
+          <div class="si-day">SUN</div>
+          <div><div class="si-t">07:30 AM</div><div class="si-s">cron 30 7 * * 0</div></div>
+          <div class="si-c">Covers<br>Thu→Sun</div>
+        </div>
+        <div class="sc-note">
+          Output: <strong style="color:rgba(255,255,255,.6)">Markdown + PDF</strong> → OneDrive · Daily Briefing<br>
+          Notification: <strong style="color:rgba(255,255,255,.6)">Google Calendar</strong> with summary + file links
+        </div>
+      </div>
+
+      <div class="cc2">
+        <div class="cc2-lbl">Model Architecture · Cost Comparison</div>
+        <div class="ci">
+          <div class="ci-n">Original · 1 agent</div>
+          <div class="ci-bw"><div class="ci-b" style="width:9%;background:var(--muted)"></div></div>
+          <div class="ci-v" style="color:var(--muted)">$0.80</div>
+        </div>
+        <div class="ci">
+          <div class="ci-n">5-agent parallel</div>
+          <div class="ci-bw"><div class="ci-b" style="width:22%;background:var(--a2)"></div></div>
+          <div class="ci-v" style="color:var(--a2)">$2.20</div>
+        </div>
+        <div class="ci">
+          <div class="ci-n">14 × low-token only</div>
+          <div class="ci-bw"><div class="ci-b" style="width:50%;background:var(--green)"></div></div>
+          <div class="ci-v" style="color:var(--green)">$4.50</div>
+        </div>
+        <div class="ci">
+          <div class="ci-n sel">✓ 14 low-token + higher-token</div>
+          <div class="ci-bw"><div class="ci-b" style="width:65%;background:var(--gold)"></div></div>
+          <div class="ci-v" style="color:var(--gold2);font-size:15px;font-weight:900">$6</div>
+        </div>
+        <div class="ci">
+          <div class="ci-n">All higher-token agents</div>
+          <div class="ci-bw"><div class="ci-b" style="width:100%;background:rgba(239,68,68,.55)"></div></div>
+          <div class="ci-v" style="color:#fca5a5">$17</div>
+        </div>
+        <div class="cc2-note">
+          Selected architecture delivers <strong style="color:var(--gold2)">65% cost saving</strong> vs. all higher-token — applying the more capable model only where judgment matters most.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-ft">
+    <span class="ft-brand">AI News &amp; Intelligence Harness</span>
+    <span class="ft-date">May 2026 · Confidential</span>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<nav class="nav">
+  <button class="nb" id="prev" onclick="go(-1)" disabled>‹</button>
+  <div class="dots" id="dots"></div>
+  <button class="nb" id="next" onclick="go(1)">›</button>
+  <span class="nc" id="nc">1 / 5</span>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let cur = 0;
+  const dotsEl = document.getElementById('dots');
+  slides.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot'+(i===0?' on':'');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    slides[cur].classList.add('prev');
+    setTimeout(() => slides[cur].classList.remove('prev'), 460);
+    cur = n;
+    slides[cur].classList.add('active');
+    document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i===cur));
+    document.getElementById('nc').textContent = (cur+1)+' / '+slides.length;
+    document.getElementById('prev').disabled = cur===0;
+    document.getElementById('next').disabled = cur===slides.length-1;
+  }
+  function go(dir) { const n=cur+dir; if(n>=0&&n<slides.length) goTo(n); }
+  document.addEventListener('keydown', e => {
+    if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')   go(-1);
+  });
+</script>
+</body>
+</html>
