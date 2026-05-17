@@ -826,47 +826,9 @@
       </div>
     </div>
   </div>
-  <div class="slide-ft">
-    <span class="ft-brand">AI News &amp; Intelligence Harness</span>
-    <span class="ft-date">May 2026 · Confidential</span>
-  </div>
-</div>
-
-</div><!-- /deck -->
-
-<nav class="nav">
-  <button class="nb" id="prev" onclick="go(-1)" disabled>‹</button>
-  <div class="dots" id="dots"></div>
-  <button class="nb" id="next" onclick="go(1)">›</button>
-  <span class="nc" id="nc">1 / 5</span>
-</nav>
-
-<script>
-  const slides = document.querySelectorAll('.slide');
-  let cur = 0;
-  const dotsEl = document.getElementById('dots');
-  slides.forEach((_,i) => {
-    const d = document.createElement('div');
-    d.className = 'dot'+(i===0?' on':'');
-    d.onclick = () => goTo(i);
-    dotsEl.appendChild(d);
-  });
-  function goTo(n) {
-    slides[cur].classList.remove('active');
-    slides[cur].classList.add('prev');
-    setTimeout(() => slides[cur].classList.remove('prev'), 460);
-    cur = n;
-    slides[cur].classList.add('active');
-    document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i===cur));
-    document.getElementById('nc').textContent = (cur+1)+' / '+slides.length;
-    document.getElementById('prev').disabled = cur===0;
-    document.getElementById('next').disabled = cur===slides.length-1;
-  }
-  function go(dir) { const n=cur+dir; if(n>=0&&n<slides.length) goTo(n); }
-  document.addEventListener('keydown', e => {
-    if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
-    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')   go(-1);
-  });
-</script>
-</body>
-</html>
+  <div style="flex-shrink:0;display:flex;gap:12px;align-items:center;padding:10px 56px 0;justify-content:center;">
+    <a href="https://github.com/mgritzbach/ai-intelligence-harness" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:8px;background:rgba(37,99,235,0.18);border:1px solid rgba(59,130,246,0.45);color:#93c5fd;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.4px;transition:background .2s;" onmouseover="this.style.background='rgba(37,99,235,0.35)'" onmouseout="this.style.background='rgba(37,99,235,0.18)'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub Repository
+    </a>
+    <a href="https://github.com/mgritzbach/ai-intelligence-harness/blob/main/SKILL.md" target="_blank" style="display:inline-flex;align-it
