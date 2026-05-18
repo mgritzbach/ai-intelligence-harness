@@ -66,6 +66,19 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 56px; border-top: 1px solid var(--bdr);
   }
+
+  /* Resource links on slide 5 */
+  .res-strip { flex-shrink:0; display:flex; gap:12px; align-items:center; padding:10px 56px 0; justify-content:center; }
+  .res-btn {
+    display:inline-flex; align-items:center; gap:8px; padding:8px 20px;
+    border-radius:8px; font-size:12px; font-weight:600; text-decoration:none;
+    letter-spacing:.4px; transition:background .2s; outline:none;
+  }
+  .res-btn:focus { outline: none; }
+  .res-gh { background:rgba(37,99,235,0.18); border:1px solid rgba(59,130,246,0.45); color:#93c5fd; }
+  .res-gh:hover { background:rgba(37,99,235,0.35); }
+  .res-sk { background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.4); color:#e8c97a; }
+  .res-sk:hover { background:rgba(201,168,76,0.30); }
   .ft-brand { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.16); }
   .ft-date  { font-size: 10px; color: rgba(255,255,255,0.16); }
 
@@ -826,9 +839,6 @@
       </div>
     </div>
   </div>
-  <div style="flex-shrink:0;display:flex;gap:12px;align-items:center;padding:10px 56px 0;justify-content:center;">
-    <a href="https://github.com/mgritzbach/ai-intelligence-harness" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:8px;background:rgba(37,99,235,0.18);border:1px solid rgba(59,130,246,0.45);color:#93c5fd;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.4px;transition:background .2s;" onmouseover="this.style.background='rgba(37,99,235,0.35)'" onmouseout="this.style.background='rgba(37,99,235,0.18)'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-      GitHub Repository
-    </a>
-    <a href="https://github.com/mgritzbach/ai-intelligence-harness/blob/main/SKILL.md" target="_blank" style="display:inline-flex;align-it
+  <div class="res-strip">
+    <a href="https://github.com/mgritzbach/ai-intelligence-harness" target="_blank" tabindex="-1" class="res-btn res-gh">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375
